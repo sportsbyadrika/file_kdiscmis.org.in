@@ -41,3 +41,43 @@ if (!function_exists('config')) {
         return \App\Config::get($key, $default);
     }
 }
+
+if (!function_exists('format_bytes')) {
+    /** Human-readable file size (e.g. "2.4 MB", "1.1 GB"). */
+    function format_bytes(int|float $bytes, int $decimals = 1): string
+    {
+        $bytes = max(0, (float) $bytes);
+        if ($bytes < 1024) {
+            return $bytes === 0.0 ? '0 KB' : number_format($bytes) . ' B';
+        }
+        $units = ['KB', 'MB', 'GB', 'TB', 'PB'];
+        $power = (int) floor(log($bytes, 1024));
+        $power = max(1, min($power, count($units))); // start at KB
+        $value = $bytes / (1024 ** $power);
+        return number_format($value, $decimals) . ' ' . $units[$power - 1];
+    }
+}
+
+if (!function_exists('format_dt')) {
+    /** Format a datetime string/timestamp as DD-MM-YYYY HH:MM. */
+    function format_dt(?string $value, string $fallback = '—'): string
+    {
+        if ($value === null || $value === '' || $value === '0000-00-00 00:00:00') {
+            return $fallback;
+        }
+        $ts = strtotime($value);
+        return $ts ? date('d-m-Y H:i', $ts) : $fallback;
+    }
+}
+
+if (!function_exists('format_date')) {
+    /** Format a date string as DD-MM-YYYY. */
+    function format_date(?string $value, string $fallback = '—'): string
+    {
+        if ($value === null || $value === '' || $value === '0000-00-00') {
+            return $fallback;
+        }
+        $ts = strtotime($value);
+        return $ts ? date('d-m-Y', $ts) : $fallback;
+    }
+}

@@ -62,6 +62,12 @@ schema.sql  single-file database migration
    ```
 
    Confirms the connection works, all 9 tables exist, and the admin is seeded.
+   Optionally populate demo data for the Dashboard:
+
+   ```bash
+   php bin/seed_demo.php          # seeds only if no files exist
+   php bin/seed_demo.php --force  # seed regardless
+   ```
 
 4. **Document root**
 
@@ -83,7 +89,8 @@ Built in the stages from the spec (Section 7):
 - [x] **Stage 1 — Foundation:** structure, config, DB connection, schema, seed admin
 - [x] **Stage 2 — Auth + navbar shell:** login/logout, change password, profile,
       session/CSRF, front-controller routing, and the responsive horizontal navbar
-- [ ] Stage 3 — Dashboard
+- [x] **Stage 3 — Dashboard:** per-app stat cards, module entry panels, recent
+      activity feed, server-side stats with AJAX refresh (optional demo seeder)
 - [ ] Stage 4 — File List View
 - [ ] Stage 5 — File Work Area
 - [ ] Stage 6 — PDF Generation

@@ -83,6 +83,71 @@ body.guest-body {
   border-radius: 14px;
 }
 
+/* ----- Dashboard: stat tiles ----- */
+.stat-tile {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .65rem .5rem;
+  border-radius: 8px;
+  height: 100%;
+}
+.stat-tile:hover { background: rgba(0, 0, 0, .02); }
+.stat-icon {
+  font-size: 1.35rem;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, .04);
+  flex: 0 0 auto;
+}
+.stat-value { font-size: 1.2rem; font-weight: 700; line-height: 1.1; }
+.stat-label { font-size: .74rem; color: #6c757d; text-transform: uppercase; letter-spacing: .02em; }
+
+/* ----- App badges / module panels ----- */
+.app-badge,
+.module-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: #fff;
+}
+.app-badge { width: 30px; height: 30px; font-size: 1rem; }
+.module-icon { width: 56px; height: 56px; font-size: 1.8rem; flex: 0 0 auto; }
+.app-badge-eoffice   { background: #2f6fed; }
+.app-badge-ospyndocs { background: #1a9a7b; }
+
+.app-badge-pill {
+  display: inline-block;
+  padding: .2rem .55rem;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 600;
+  color: #fff;
+}
+.module-panel .card-footer { border-top: 1px solid rgba(0,0,0,.06); }
+
+/* ----- Activity feed ----- */
+.activity-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: .8rem;
+}
+.activity-table th {
+  font-size: .76rem;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+  color: #6c757d;
+}
+
 /* ----- Misc ----- */
 .breadcrumb {
   --bs-breadcrumb-divider: '›';

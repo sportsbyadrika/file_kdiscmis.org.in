@@ -11,6 +11,7 @@ use App\Auth;
 use App\Router;
 use App\Session;
 use App\Controllers\AuthController;
+use App\Controllers\DashboardController;
 use App\Controllers\PageController;
 use App\Controllers\ProfileController;
 
@@ -29,7 +30,8 @@ $router->get('/', static function (): void {
 });
 
 // --- Authenticated pages -------------------------------------------
-$router->get('/dashboard',   [PageController::class, 'dashboard']);
+$router->get('/dashboard',       [DashboardController::class, 'index']);
+$router->get('/dashboard/stats', [DashboardController::class, 'stats']);
 $router->get('/eoffice',     [PageController::class, 'eoffice']);
 $router->get('/ospyndocs',   [PageController::class, 'ospyndocs']);
 $router->get('/bulk-upload', [PageController::class, 'bulkUpload']);
