@@ -95,7 +95,11 @@ Built in the stages from the spec (Section 7):
       removable chips, single-column sort (session-persisted), column toggle
       and per-page (user_preferences), pagination, metadata edit modal with
       update logging, and soft-delete — generalised across both apps
-- [ ] Stage 5 — File Work Area
+- [x] **Stage 5 — File Work Area:** split-panel workspace with sticky top bar,
+      rich-text note editor (Quill) with char/word count + expand toggle,
+      Details/Attachments/History tabs (tab persisted in sessionStorage),
+      real attachment upload/preview/download/soft-delete, immutable history
+      with CSV export, and an Edit Metadata modal
 - [ ] Stage 6 — PDF Generation
 - [ ] Stage 7 — Bulk Upload wizard
 - [ ] Stage 8 — Audit Log + polish

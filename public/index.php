@@ -15,6 +15,7 @@ use App\Controllers\DashboardController;
 use App\Controllers\FileListController;
 use App\Controllers\PageController;
 use App\Controllers\ProfileController;
+use App\Controllers\WorkAreaController;
 
 Session::start();
 
@@ -41,7 +42,15 @@ foreach (['eoffice', 'ospyndocs'] as $app) {
     $router->get("/{$app}/edit",     [FileListController::class, 'edit']);
     $router->post("/{$app}/update",  [FileListController::class, 'update']);
     $router->post("/{$app}/delete",  [FileListController::class, 'delete']);
-    $router->get("/{$app}/view",     [PageController::class, 'workArea']); // Stage 5
+
+    // File Work Area (Stage 5)
+    $router->get("/{$app}/view",                 [WorkAreaController::class, 'show']);
+    $router->post("/{$app}/note",                [WorkAreaController::class, 'saveNote']);
+    $router->post("/{$app}/attachment/upload",   [WorkAreaController::class, 'uploadAttachment']);
+    $router->post("/{$app}/attachment/delete",   [WorkAreaController::class, 'deleteAttachment']);
+    $router->get("/{$app}/attachment/download",  [WorkAreaController::class, 'downloadAttachment']);
+    $router->get("/{$app}/attachment/preview",   [WorkAreaController::class, 'previewAttachment']);
+    $router->get("/{$app}/history.csv",          [WorkAreaController::class, 'historyCsv']);
 }
 
 $router->get('/bulk-upload', [PageController::class, 'bulkUpload']);
