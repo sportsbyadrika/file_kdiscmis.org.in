@@ -236,6 +236,20 @@ body.guest-body {
   .detail-key { flex-basis: auto; }
 }
 
+/* ----- PDF options modal ----- */
+.step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--app-accent);
+  color: #fff;
+  font-size: .75rem;
+  margin-right: .35rem;
+}
+
 /* ----- Misc ----- */
 .breadcrumb {
   --bs-breadcrumb-divider: '›';

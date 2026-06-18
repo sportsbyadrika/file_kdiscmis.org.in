@@ -159,7 +159,8 @@
       if (e.target.closest('.js-download')) {
         if (window.showToast) window.showToast('Attachment download arrives with the Work Area (Stage 5).', 'info');
       } else if (e.target.closest('.js-pdf')) {
-        if (window.showToast) window.showToast('PDF generation arrives in Stage 6.', 'info');
+        var pdfBtn = e.target.closest('.js-pdf');
+        if (window.openPdfModal) window.openPdfModal(pdfBtn.getAttribute('data-id'));
       }
     });
   }

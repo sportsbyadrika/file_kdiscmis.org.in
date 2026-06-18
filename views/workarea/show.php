@@ -141,6 +141,8 @@ $statusClass = static function (string $status): string {
   </section>
 </div>
 
+<?= View::renderPartial('partials/pdf_modal') ?>
+
 <!-- Edit metadata modal (reuses the list's edit endpoints) -->
 <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
@@ -193,6 +195,8 @@ $statusClass = static function (string $status): string {
     attDeleteUrl: <?= json_encode(base_url('/' . $app . '/attachment/delete')) ?>,
     csrfToken: <?= json_encode(\App\Csrf::token()) ?>
   };
+  window.PdfConfig = { url: <?= json_encode(base_url('/' . $app . '/pdf')) ?> };
 </script>
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+<script src="<?= e(base_url('/assets/js/pdf.js')) ?>"></script>
 <script src="<?= e(base_url('/assets/js/workarea.js')) ?>"></script>

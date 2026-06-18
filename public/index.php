@@ -14,6 +14,7 @@ use App\Controllers\AuthController;
 use App\Controllers\DashboardController;
 use App\Controllers\FileListController;
 use App\Controllers\PageController;
+use App\Controllers\PdfController;
 use App\Controllers\ProfileController;
 use App\Controllers\WorkAreaController;
 
@@ -51,6 +52,9 @@ foreach (['eoffice', 'ospyndocs'] as $app) {
     $router->get("/{$app}/attachment/download",  [WorkAreaController::class, 'downloadAttachment']);
     $router->get("/{$app}/attachment/preview",   [WorkAreaController::class, 'previewAttachment']);
     $router->get("/{$app}/history.csv",          [WorkAreaController::class, 'historyCsv']);
+
+    // PDF generation (Stage 6) — streamed in memory
+    $router->get("/{$app}/pdf",                  [PdfController::class, 'generate']);
 }
 
 $router->get('/bulk-upload', [PageController::class, 'bulkUpload']);

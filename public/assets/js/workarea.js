@@ -261,7 +261,7 @@
   function initPdf() {
     var btn = document.getElementById('btnGenPdf');
     if (btn) btn.addEventListener('click', function () {
-      if (window.showToast) window.showToast('PDF generation arrives in Stage 6.', 'info');
+      if (window.openPdfModal) window.openPdfModal(cfg.id);
     });
   }
 })();
