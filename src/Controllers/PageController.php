@@ -13,19 +13,6 @@ use App\View;
  */
 final class PageController
 {
-    public function dashboard(): void
-    {
-        Auth::requireLogin();
-        View::render('placeholder', [
-            'pageTitle' => 'Dashboard',
-            'active'    => 'dashboard',
-            'heading'   => 'Dashboard',
-            'icon'      => 'bi-speedometer2',
-            'stage'     => '3',
-            'note'      => 'Summary stat cards, module panels, and the recent activity feed arrive in Stage 3.',
-        ]);
-    }
-
     public function eoffice(): void
     {
         Auth::requireLogin();
