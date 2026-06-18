@@ -91,7 +91,10 @@ Built in the stages from the spec (Section 7):
       session/CSRF, front-controller routing, and the responsive horizontal navbar
 - [x] **Stage 3 — Dashboard:** per-app stat cards, module entry panels, recent
       activity feed, server-side stats with AJAX refresh (optional demo seeder)
-- [ ] Stage 4 — File List View
+- [x] **Stage 4 — File List View:** AJAX keyword/date/multi-select filters with
+      removable chips, single-column sort (session-persisted), column toggle
+      and per-page (user_preferences), pagination, metadata edit modal with
+      update logging, and soft-delete — generalised across both apps
 - [ ] Stage 5 — File Work Area
 - [ ] Stage 6 — PDF Generation
 - [ ] Stage 7 — Bulk Upload wizard

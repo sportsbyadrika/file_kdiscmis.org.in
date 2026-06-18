@@ -12,6 +12,7 @@ use App\Router;
 use App\Session;
 use App\Controllers\AuthController;
 use App\Controllers\DashboardController;
+use App\Controllers\FileListController;
 use App\Controllers\PageController;
 use App\Controllers\ProfileController;
 
@@ -32,8 +33,17 @@ $router->get('/', static function (): void {
 // --- Authenticated pages -------------------------------------------
 $router->get('/dashboard',       [DashboardController::class, 'index']);
 $router->get('/dashboard/stats', [DashboardController::class, 'stats']);
-$router->get('/eoffice',     [PageController::class, 'eoffice']);
-$router->get('/ospyndocs',   [PageController::class, 'ospyndocs']);
+
+// File List View — both apps share one controller (app resolved from path).
+foreach (['eoffice', 'ospyndocs'] as $app) {
+    $router->get("/{$app}",          [FileListController::class, 'index']);
+    $router->get("/{$app}/data",     [FileListController::class, 'data']);
+    $router->get("/{$app}/edit",     [FileListController::class, 'edit']);
+    $router->post("/{$app}/update",  [FileListController::class, 'update']);
+    $router->post("/{$app}/delete",  [FileListController::class, 'delete']);
+    $router->get("/{$app}/view",     [PageController::class, 'workArea']); // Stage 5
+}
+
 $router->get('/bulk-upload', [PageController::class, 'bulkUpload']);
 $router->get('/audit-log',   [PageController::class, 'auditLog']);
 

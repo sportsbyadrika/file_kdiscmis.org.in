@@ -13,29 +13,19 @@ use App\View;
  */
 final class PageController
 {
-    public function eoffice(): void
+    /** GET /{app}/view — File Work Area (full implementation in Stage 5). */
+    public function workArea(): void
     {
         Auth::requireLogin();
+        $app = str_contains((string) ($_SERVER['REQUEST_URI'] ?? ''), '/ospyndocs') ? 'ospyndocs' : 'eoffice';
+        $id  = (int) ($_GET['id'] ?? 0);
         View::render('placeholder', [
-            'pageTitle' => 'eOffice Files',
-            'active'    => 'eoffice',
-            'heading'   => 'eOffice Files',
-            'icon'      => 'bi-folder2-open',
-            'stage'     => '4',
-            'note'      => 'The eOffice file list (filters, sort, columns, pagination) arrives in Stage 4.',
-        ]);
-    }
-
-    public function ospyndocs(): void
-    {
-        Auth::requireLogin();
-        View::render('placeholder', [
-            'pageTitle' => 'OspynDocs Files',
-            'active'    => 'ospyndocs',
-            'heading'   => 'OspynDocs Files',
-            'icon'      => 'bi-files',
-            'stage'     => '4',
-            'note'      => 'The OspynDocs file list arrives in Stage 4.',
+            'pageTitle' => 'File Work Area',
+            'active'    => $app,
+            'heading'   => 'File Work Area',
+            'icon'      => 'bi-window-split',
+            'stage'     => '5',
+            'note'      => 'The split-panel work area (note, details, attachments, history) for record #' . $id . ' arrives in Stage 5.',
         ]);
     }
 
