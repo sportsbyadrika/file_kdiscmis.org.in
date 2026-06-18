@@ -1,0 +1,24 @@
+# Local configuration (contains DB credentials & secrets)
+/config/config.php
+
+# Uploaded files & generated artifacts
+/storage/uploads/*
+!/storage/uploads/.gitkeep
+/storage/reports/*
+!/storage/reports/.gitkeep
+/storage/tmp/*
+!/storage/tmp/.gitkeep
+
+# Dependencies (vendored libraries added per-stage)
+/vendor/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
+
+# Logs
+*.log
