@@ -81,7 +81,8 @@ See `schema.sql` for full definitions, foreign keys, and indexes.
 Built in the stages from the spec (Section 7):
 
 - [x] **Stage 1 — Foundation:** structure, config, DB connection, schema, seed admin
-- [ ] Stage 2 — Auth + navbar shell
+- [x] **Stage 2 — Auth + navbar shell:** login/logout, change password, profile,
+      session/CSRF, front-controller routing, and the responsive horizontal navbar
 - [ ] Stage 3 — Dashboard
 - [ ] Stage 4 — File List View
 - [ ] Stage 5 — File Work Area

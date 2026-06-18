@@ -2,17 +2,43 @@
 declare(strict_types=1);
 
 /**
- * Front controller / entry point.
- *
- * For Stage 1 (Foundation) this simply verifies the app is wired up and
- * routes the visitor onward. Authentication and the navbar shell arrive
- * in Stage 2, at which point unauthenticated users are sent to the login
- * page and authenticated users land on the Dashboard.
+ * Front controller. All requests are routed through here (see .htaccess).
  */
 
 require dirname(__DIR__) . '/src/bootstrap.php';
 
-// Stage 2 will replace this with: redirect to /login or /dashboard.
-header('Content-Type: text/plain; charset=utf-8');
-echo \App\Config::get('app.name', 'File Repository') . " — foundation OK.\n";
-echo "Stage 1 complete. Auth & navbar shell arrive in Stage 2.\n";
+use App\Auth;
+use App\Router;
+use App\Session;
+use App\Controllers\AuthController;
+use App\Controllers\PageController;
+use App\Controllers\ProfileController;
+
+Session::start();
+
+$router = new Router();
+
+// --- Public ---------------------------------------------------------
+$router->get('/login',  [AuthController::class, 'showLogin']);
+$router->post('/login', [AuthController::class, 'login']);
+$router->post('/logout', [AuthController::class, 'logout']);
+
+// --- Root: send to dashboard or login ------------------------------
+$router->get('/', static function (): void {
+    redirect(Auth::check() && Auth::user() !== null ? '/dashboard' : '/login');
+});
+
+// --- Authenticated pages -------------------------------------------
+$router->get('/dashboard',   [PageController::class, 'dashboard']);
+$router->get('/eoffice',     [PageController::class, 'eoffice']);
+$router->get('/ospyndocs',   [PageController::class, 'ospyndocs']);
+$router->get('/bulk-upload', [PageController::class, 'bulkUpload']);
+$router->get('/audit-log',   [PageController::class, 'auditLog']);
+
+// --- Profile & password --------------------------------------------
+$router->get('/profile',          [ProfileController::class, 'show']);
+$router->post('/profile',         [ProfileController::class, 'update']);
+$router->get('/change-password',  [AuthController::class, 'showChangePassword']);
+$router->post('/change-password', [AuthController::class, 'changePassword']);
+
+$router->dispatch();

@@ -1,0 +1,25 @@
+# Front-controller routing for the File Repository app.
+# Point the web server's document root at this /public directory.
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # If the app lives in a sub-directory, uncomment and set the base:
+    # RewriteBase /
+
+    # Serve existing files and directories directly (assets, etc.).
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Everything else goes through the front controller.
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Security: do not serve dotfiles.
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# Default to index.php.
+DirectoryIndex index.php
