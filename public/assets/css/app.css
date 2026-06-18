@@ -1,0 +1,92 @@
+/* =====================================================================
+   File Repository — application styles
+   ===================================================================== */
+
+:root {
+  --app-navbar-bg: #1f3a5f;
+  --app-navbar-active: #ffffff;
+  --app-accent: #2f6fed;
+  --app-bg: #f4f6f9;
+}
+
+body.app-body {
+  background: var(--app-bg);
+  min-height: 100vh;
+}
+
+/* ----- Navbar ----- */
+.app-navbar {
+  background: var(--app-navbar-bg);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .12);
+}
+.app-navbar .navbar-brand .brand-text {
+  font-weight: 600;
+  letter-spacing: .2px;
+}
+.app-navbar .app-logo {
+  background: #fff;
+  border-radius: 6px;
+  padding: 2px;
+}
+.app-navbar .nav-link {
+  color: rgba(255, 255, 255, .82);
+  border-radius: 6px;
+  padding-inline: .75rem;
+  transition: background-color .15s ease, color .15s ease;
+}
+.app-navbar .nav-link:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, .10);
+}
+.app-navbar .nav-link.active {
+  color: var(--app-navbar-active);
+  background: rgba(255, 255, 255, .18);
+  font-weight: 600;
+}
+
+/* Avatar circle in the profile dropdown */
+.avatar-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--app-accent);
+  color: #fff;
+  font-weight: 600;
+  font-size: .9rem;
+}
+
+.app-main {
+  padding-bottom: 2rem;
+}
+
+/* ----- Guest / login ----- */
+body.guest-body {
+  background: linear-gradient(135deg, #1f3a5f 0%, #2f6fed 100%);
+  min-height: 100vh;
+}
+.guest-main {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+.login-wrap {
+  width: 100%;
+  max-width: 420px;
+}
+.login-card {
+  border: none;
+  border-radius: 14px;
+}
+
+/* ----- Misc ----- */
+.breadcrumb {
+  --bs-breadcrumb-divider: '›';
+}
+.card {
+  border-radius: 10px;
+}

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120" role="img" aria-label="Institution logo placeholder">
+  <rect width="120" height="120" rx="20" fill="#1f3a5f"/>
+  <g fill="none" stroke="#ffffff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M30 44 h26 l8 10 h26 v34 a4 4 0 0 1 -4 4 H34 a4 4 0 0 1 -4 -4 Z" fill="#2f6fed"/>
+    <path d="M30 44 v-6 a4 4 0 0 1 4 -4 h16 l8 10" fill="none"/>
+  </g>
+  <rect x="48" y="62" width="24" height="4" rx="2" fill="#ffffff"/>
+  <rect x="48" y="72" width="24" height="4" rx="2" fill="#ffffff"/>
+</svg>
