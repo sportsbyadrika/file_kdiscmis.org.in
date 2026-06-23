@@ -108,7 +108,12 @@ Built in the stages from the spec (Section 7):
       summary); per-record atomic INSERT/UPDATE/HISTORY_ONLY, deduplicated
       history, update logging with batch id, and a downloadable CSV result
       report — self-contained XLSX reader/writer (no PhpSpreadsheet)
-- [ ] Stage 8 — Audit Log + polish
+- [x] **Stage 8 — Audit Log + polish:** unified, filterable event/update log
+      across all files (by app, event type, source, keyword, date, and
+      import_batch_id for full bulk-session traceability), with toasts and
+      confirmation modals throughout
+
+All eight build stages are complete.
 
 ## Security notes
 

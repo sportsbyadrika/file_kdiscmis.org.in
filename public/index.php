@@ -10,11 +10,11 @@ require dirname(__DIR__) . '/src/bootstrap.php';
 use App\Auth;
 use App\Router;
 use App\Session;
+use App\Controllers\AuditController;
 use App\Controllers\AuthController;
 use App\Controllers\BulkController;
 use App\Controllers\DashboardController;
 use App\Controllers\FileListController;
-use App\Controllers\PageController;
 use App\Controllers\PdfController;
 use App\Controllers\ProfileController;
 use App\Controllers\WorkAreaController;
@@ -65,7 +65,7 @@ $router->post('/bulk-upload/validate', [BulkController::class, 'validate']);
 $router->post('/bulk-upload/process',  [BulkController::class, 'process']);
 $router->get('/bulk-upload/report',   [BulkController::class, 'report']);
 
-$router->get('/audit-log',   [PageController::class, 'auditLog']);
+$router->get('/audit-log',   [AuditController::class, 'index']);
 
 // --- Profile & password --------------------------------------------
 $router->get('/profile',          [ProfileController::class, 'show']);
