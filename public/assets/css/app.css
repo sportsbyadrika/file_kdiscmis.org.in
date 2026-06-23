@@ -250,6 +250,61 @@ body.guest-body {
   margin-right: .35rem;
 }
 
+/* ----- Bulk upload wizard ----- */
+.wizard-steps {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  padding: 0;
+  margin: 0;
+  counter-reset: step;
+}
+.wizard-steps li {
+  flex: 1 1 0;
+  min-width: 120px;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem .75rem;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, .08);
+  color: #6c757d;
+  font-size: .85rem;
+}
+.wizard-steps li span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #e9ecef;
+  color: #6c757d;
+  font-weight: 600;
+  flex: 0 0 auto;
+}
+.wizard-steps li.active { border-color: var(--app-accent); color: var(--app-accent); font-weight: 600; }
+.wizard-steps li.active span { background: var(--app-accent); color: #fff; }
+.wizard-steps li.done span { background: #1a9a7b; color: #fff; }
+
+.app-select-card {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: 1rem;
+  border: 2px solid rgba(0, 0, 0, .08);
+  border-radius: 10px;
+  cursor: pointer;
+  width: 100%;
+  transition: border-color .15s ease, background-color .15s ease;
+}
+.app-select-card:hover { border-color: var(--app-accent); }
+.app-select-card.selected { border-color: var(--app-accent); background: rgba(47, 111, 237, .05); }
+.app-select-card .check-icon { color: var(--app-accent); opacity: 0; font-size: 1.25rem; }
+.app-select-card.selected .check-icon { opacity: 1; }
+
 /* ----- Misc ----- */
 .breadcrumb {
   --bs-breadcrumb-divider: '›';

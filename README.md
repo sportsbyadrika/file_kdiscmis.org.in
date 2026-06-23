@@ -14,7 +14,7 @@ Built with vanilla PHP 8 + PDO MySQL for standard LAMP shared hosting
 - **Database:** MySQL 8 / MariaDB, UTF8MB4
 - **Frontend:** Bootstrap 5, vanilla JS + `fetch`
 - **PDF:** vendored FPDF (server-side, streamed in-memory) + MIT QR generator
-- **Spreadsheets:** PhpSpreadsheet (.xlsx) + native CSV — added in a later stage
+- **Spreadsheets:** self-contained XLSX reader/writer (zip + XML) + native CSV
 
 ## Project structure
 
@@ -103,7 +103,11 @@ Built in the stages from the spec (Section 7):
 - [x] **Stage 6 — PDF Generation:** options modal (Minimum/Standard/Detailed,
       attachments/history/QR toggles, download or preview), A4 portrait with
       per-page header/footer, vector QR code, streamed in memory (never stored)
-- [ ] Stage 7 — Bulk Upload wizard
+- [x] **Stage 7 — Bulk Upload wizard:** 5-step wizard (select app, .xlsx/.csv
+      template, upload + colour-coded validation preview, typed-confirm process,
+      summary); per-record atomic INSERT/UPDATE/HISTORY_ONLY, deduplicated
+      history, update logging with batch id, and a downloadable CSV result
+      report — self-contained XLSX reader/writer (no PhpSpreadsheet)
 - [ ] Stage 8 — Audit Log + polish
 
 ## Security notes

@@ -13,19 +13,6 @@ use App\View;
  */
 final class PageController
 {
-    public function bulkUpload(): void
-    {
-        Auth::requireLogin();
-        View::render('placeholder', [
-            'pageTitle' => 'Bulk Upload',
-            'active'    => 'bulk-upload',
-            'heading'   => 'Bulk Upload',
-            'icon'      => 'bi-cloud-arrow-up',
-            'stage'     => '7',
-            'note'      => 'The 5-step bulk upload wizard arrives in Stage 7.',
-        ]);
-    }
-
     public function auditLog(): void
     {
         Auth::requireLogin();

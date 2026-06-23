@@ -39,6 +39,16 @@ final class FileRecord
         ];
     }
 
+    /** Resolve a non-deleted record's id by its match key (reference_no). */
+    public static function findIdByRef(string $app, string $ref): ?int
+    {
+        $row = Database::run(
+            'SELECT id FROM files WHERE source_app = :app AND reference_no = :ref AND is_deleted = 0 LIMIT 1',
+            ['app' => $app, 'ref' => $ref]
+        )->fetch();
+        return $row ? (int) $row['id'] : null;
+    }
+
     /** Find a non-deleted record (core + metadata + actor names) for the app. */
     public static function find(string $app, int $id): ?array
     {
