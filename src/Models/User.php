@@ -15,9 +15,9 @@ final class User
     {
         $sql = 'SELECT id, username, email, password_hash, full_name, role, is_active
                 FROM users
-                WHERE (username = :login OR email = :login) AND is_active = 1
+                WHERE (username = :login_u OR email = :login_e) AND is_active = 1
                 LIMIT 1';
-        $row = Database::run($sql, ['login' => $login])->fetch();
+        $row = Database::run($sql, ['login_u' => $login, 'login_e' => $login])->fetch();
         return $row ?: null;
     }
 

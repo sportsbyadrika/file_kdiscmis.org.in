@@ -71,8 +71,10 @@ final class AuditLog
             $params['batch'] = $filters['batch'];
         }
         if (!empty($filters['keyword'])) {
-            $conds[] = '(e.reference_no LIKE :kw OR e.title LIKE :kw)';
-            $params['kw'] = '%' . $filters['keyword'] . '%';
+            $conds[] = '(e.reference_no LIKE :kw1 OR e.title LIKE :kw2)';
+            $like = '%' . $filters['keyword'] . '%';
+            $params['kw1'] = $like;
+            $params['kw2'] = $like;
         }
         if (!empty($filters['date_from'])) {
             $conds[] = 'e.ts >= :dfrom';
