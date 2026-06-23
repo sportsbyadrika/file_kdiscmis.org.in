@@ -153,7 +153,7 @@ final class WorkAreaController
         header('Cache-Control: no-store');
 
         $out = fopen('php://output', 'w');
-        fputcsv($out, ['#', 'Date', 'Transaction Type', 'From Status', 'To Status', 'Note', 'Performed By', 'Source']);
+        fputcsv($out, ['#', 'Date', 'Transaction Type', 'From Status', 'To Status', 'Note', 'Performed By', 'Source'], ',', '"', '');
         foreach ($rows as $i => $r) {
             fputcsv($out, [
                 $i + 1,
@@ -164,7 +164,7 @@ final class WorkAreaController
                 $r['note'] ?? '',
                 $r['performed_by_name'],
                 $r['source'],
-            ]);
+            ], ',', '"', '');
         }
         fclose($out);
     }

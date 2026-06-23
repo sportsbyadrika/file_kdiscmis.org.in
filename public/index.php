@@ -11,6 +11,7 @@ use App\Auth;
 use App\Router;
 use App\Session;
 use App\Controllers\AuthController;
+use App\Controllers\BulkController;
 use App\Controllers\DashboardController;
 use App\Controllers\FileListController;
 use App\Controllers\PageController;
@@ -57,7 +58,13 @@ foreach (['eoffice', 'ospyndocs'] as $app) {
     $router->get("/{$app}/pdf",                  [PdfController::class, 'generate']);
 }
 
-$router->get('/bulk-upload', [PageController::class, 'bulkUpload']);
+// Bulk Upload wizard (Stage 7)
+$router->get('/bulk-upload',          [BulkController::class, 'index']);
+$router->get('/bulk-upload/template', [BulkController::class, 'template']);
+$router->post('/bulk-upload/validate', [BulkController::class, 'validate']);
+$router->post('/bulk-upload/process',  [BulkController::class, 'process']);
+$router->get('/bulk-upload/report',   [BulkController::class, 'report']);
+
 $router->get('/audit-log',   [PageController::class, 'auditLog']);
 
 // --- Profile & password --------------------------------------------
