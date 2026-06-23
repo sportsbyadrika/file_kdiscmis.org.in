@@ -44,6 +44,7 @@ final class BulkProcessor
 
                 if ($row['kind'] === 'insert') {
                     $fileId = self::insertRecord($app, $metaTable, $dupCol, $fields, $row, $userId, $now);
+                    self::logEvent($fileId, $userId, $now, $batchId, ['_event' => 'Inserted']);
                     $hist = self::applyHistory($fileId, $row['history'], $userId);
                     $counts['inserted']++;
                     $counts['history'] += $hist;
@@ -62,6 +63,7 @@ final class BulkProcessor
                         $result = 'Updated';
                         $detail = "Updated {$changed} field(s)" . ($hist ? " (+{$hist} history)" : '');
                     } elseif ($hist > 0) {
+                        self::logEvent($fileId, $userId, $now, $batchId, ['_event' => 'History Added']);
                         $result = 'History Added';
                         $detail = "Added {$hist} history row(s); no metadata change";
                     } else {
@@ -76,10 +78,14 @@ final class BulkProcessor
                     }
                     $hist = self::applyHistory($fileId, $row['history'], $userId);
                     $counts['history'] += $hist;
-                    $result = $hist > 0 ? 'History Added' : 'Skipped';
-                    $detail = $hist > 0 ? "Added {$hist} history row(s)" : 'History already present (deduplicated)';
-                    if ($hist === 0) {
+                    if ($hist > 0) {
+                        self::logEvent($fileId, $userId, $now, $batchId, ['_event' => 'History Added']);
+                        $result = 'History Added';
+                        $detail = "Added {$hist} history row(s)";
+                    } else {
                         $counts['skipped']++;
+                        $result = 'Skipped';
+                        $detail = 'History already present (deduplicated)';
                     }
                 }
 
@@ -199,6 +205,19 @@ final class BulkProcessor
         }
 
         return count($changes);
+    }
+
+    /** Write a batch-linked audit entry (so every touched record is traceable). */
+    private static function logEvent(int $fileId, int $userId, string $now, string $batchId, array $changes): void
+    {
+        Database::run(
+            'INSERT INTO file_update_log (file_id, updated_by, update_source, updated_at, fields_changed, import_batch_id)
+             VALUES (:fid, :u, :src, :now, :fc, :batch)',
+            [
+                'fid' => $fileId, 'u' => $userId, 'src' => 'BULK_IMPORT', 'now' => $now,
+                'fc' => json_encode($changes, JSON_UNESCAPED_UNICODE), 'batch' => $batchId,
+            ]
+        );
     }
 
     /** Insert a deduplicated history row; returns 1 if inserted, 0 if deduped/none. */
