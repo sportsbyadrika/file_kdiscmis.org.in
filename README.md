@@ -13,7 +13,7 @@ Built with vanilla PHP 8 + PDO MySQL for standard LAMP shared hosting
 - **Backend:** PHP 8.x, PDO (prepared statements only — no concatenated SQL)
 - **Database:** MySQL 8 / MariaDB, UTF8MB4
 - **Frontend:** Bootstrap 5, vanilla JS + `fetch`
-- **PDF:** mPDF/TCPDF (server-side, streamed in-memory) — added in a later stage
+- **PDF:** vendored FPDF (server-side, streamed in-memory) + MIT QR generator
 - **Spreadsheets:** PhpSpreadsheet (.xlsx) + native CSV — added in a later stage
 
 ## Project structure
@@ -95,8 +95,14 @@ Built in the stages from the spec (Section 7):
       removable chips, single-column sort (session-persisted), column toggle
       and per-page (user_preferences), pagination, metadata edit modal with
       update logging, and soft-delete — generalised across both apps
-- [ ] Stage 5 — File Work Area
-- [ ] Stage 6 — PDF Generation
+- [x] **Stage 5 — File Work Area:** split-panel workspace with sticky top bar,
+      rich-text note editor (Quill) with char/word count + expand toggle,
+      Details/Attachments/History tabs (tab persisted in sessionStorage),
+      real attachment upload/preview/download/soft-delete, immutable history
+      with CSV export, and an Edit Metadata modal
+- [x] **Stage 6 — PDF Generation:** options modal (Minimum/Standard/Detailed,
+      attachments/history/QR toggles, download or preview), A4 portrait with
+      per-page header/footer, vector QR code, streamed in memory (never stored)
 - [ ] Stage 7 — Bulk Upload wizard
 - [ ] Stage 8 — Audit Log + polish
 

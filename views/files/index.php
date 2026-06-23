@@ -155,6 +155,8 @@ $countEnd   = min($perPage, $total);
   </div>
 </div>
 
+<?= View::renderPartial('partials/pdf_modal') ?>
+
 <!-- Edit modal -->
 <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
@@ -195,5 +197,7 @@ $countEnd   = min($perPage, $total);
     viewUrl: <?= json_encode(base_url('/' . $app . '/view')) ?>,
     csrfToken: <?= json_encode(\App\Csrf::token()) ?>
   };
+  window.PdfConfig = { url: <?= json_encode(base_url('/' . $app . '/pdf')) ?> };
 </script>
+<script src="<?= e(base_url('/assets/js/pdf.js')) ?>"></script>
 <script src="<?= e(base_url('/assets/js/filelist.js')) ?>"></script>

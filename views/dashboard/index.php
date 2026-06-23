@@ -113,7 +113,7 @@ $actionMeta = [
                   <td class="small"><?= e($row['actor']) ?></td>
                   <td class="small text-nowrap"><?= e(format_dt($row['ts'])) ?></td>
                   <td class="text-end">
-                    <a href="<?= e(base_url('/' . $app)) ?>" class="btn btn-sm btn-outline-secondary" title="View File">
+                    <a href="<?= e(base_url('/' . $app . '/view?id=' . (int) $row['file_id'])) ?>" class="btn btn-sm btn-outline-secondary" title="View File">
                       <i class="bi bi-box-arrow-up-right"></i><span class="d-none d-lg-inline ms-1">View File</span>
                     </a>
                   </td>

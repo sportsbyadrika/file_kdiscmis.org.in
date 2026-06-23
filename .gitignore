@@ -9,8 +9,8 @@
 /storage/tmp/*
 !/storage/tmp/.gitkeep
 
-# Dependencies (vendored libraries added per-stage)
-/vendor/
+# Note: /vendor holds manually-vendored libraries (FPDF, QR) and IS committed,
+# since Composer is unavailable on the target shared hosting.
 
 # OS / editor noise
 .DS_Store

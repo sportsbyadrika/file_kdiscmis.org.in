@@ -13,22 +13,6 @@ use App\View;
  */
 final class PageController
 {
-    /** GET /{app}/view — File Work Area (full implementation in Stage 5). */
-    public function workArea(): void
-    {
-        Auth::requireLogin();
-        $app = str_contains((string) ($_SERVER['REQUEST_URI'] ?? ''), '/ospyndocs') ? 'ospyndocs' : 'eoffice';
-        $id  = (int) ($_GET['id'] ?? 0);
-        View::render('placeholder', [
-            'pageTitle' => 'File Work Area',
-            'active'    => $app,
-            'heading'   => 'File Work Area',
-            'icon'      => 'bi-window-split',
-            'stage'     => '5',
-            'note'      => 'The split-panel work area (note, details, attachments, history) for record #' . $id . ' arrives in Stage 5.',
-        ]);
-    }
-
     public function bulkUpload(): void
     {
         Auth::requireLogin();

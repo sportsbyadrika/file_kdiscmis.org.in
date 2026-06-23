@@ -166,6 +166,90 @@ body.guest-body {
   border-radius: 10px;
 }
 
+/* ----- Work Area (split panel) ----- */
+:root { --nav-h: 56px; --topbar-h: 50px; }
+
+.workarea-topbar {
+  position: sticky;
+  top: var(--nav-h);
+  z-index: 100;
+  background: #fff;
+  border-bottom: 1px solid rgba(0, 0, 0, .08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .04);
+}
+
+.workarea-split {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+}
+.wa-panel {
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.wa-note { flex: 0 0 40%; border-right: 1px solid rgba(0, 0, 0, .08); }
+.wa-tabs { flex: 1 1 60%; }
+
+.wa-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  padding: .6rem .9rem;
+  border-bottom: 1px solid rgba(0, 0, 0, .06);
+  background: #fafbfc;
+}
+.wa-panel-body {
+  padding: 1rem;
+  overflow-y: auto;
+  max-height: calc(100vh - var(--nav-h) - var(--topbar-h));
+}
+
+/* Expand: note fills full width, tabs hidden */
+.workarea-split.note-expanded .wa-note { flex-basis: 100%; border-right: none; }
+.workarea-split.note-expanded .wa-tabs { display: none; }
+
+.note-content { line-height: 1.6; word-wrap: break-word; }
+.note-content img { max-width: 100%; height: auto; }
+
+/* Details key/value grid */
+.detail-row {
+  display: flex;
+  gap: 1rem;
+  padding: .5rem 0;
+  border-bottom: 1px dashed rgba(0, 0, 0, .07);
+}
+.detail-key { flex: 0 0 180px; color: #6c757d; font-size: .85rem; }
+.detail-val { flex: 1 1 auto; min-width: 0; }
+
+/* Thin scrollbars on overflow panels */
+.wa-panel-body::-webkit-scrollbar { width: 8px; }
+.wa-panel-body::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, .2); border-radius: 4px; }
+
+@media (max-width: 767.98px) {
+  .workarea-split { flex-direction: column; }
+  .wa-note, .wa-tabs { flex-basis: auto; width: 100%; border-right: none; }
+  .wa-panel-body { max-height: none; }
+  .detail-row { flex-direction: column; gap: .15rem; }
+  .detail-key { flex-basis: auto; }
+}
+
+/* ----- PDF options modal ----- */
+.step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--app-accent);
+  color: #fff;
+  font-size: .75rem;
+  margin-right: .35rem;
+}
+
 /* ----- Misc ----- */
 .breadcrumb {
   --bs-breadcrumb-divider: '›';

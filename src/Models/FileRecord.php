@@ -39,18 +39,78 @@ final class FileRecord
         ];
     }
 
-    /** Find a non-deleted record (core + metadata) for the given app. */
+    /** Find a non-deleted record (core + metadata + actor names) for the app. */
     public static function find(string $app, int $id): ?array
     {
         $c = FileList::config($app);
-        $sql = "SELECT f.id, f.source_app, f.reference_no, f.status, f.upload_date,
-                       f.created_at, f.last_updated_on, m.*
+        $sql = "SELECT f.id, f.source_app, f.reference_no, f.status, f.file_note,
+                       f.upload_date, f.created_at, f.uploaded_by, f.last_updated_by, f.last_updated_on,
+                       COALESCE(NULLIF(uu.full_name, ''), uu.username) AS uploaded_by_name,
+                       COALESCE(NULLIF(lu.full_name, ''), lu.username) AS updated_by_name,
+                       m.*
                 FROM files f
                 JOIN {$c['meta_table']} m ON m.file_id = f.id
+                LEFT JOIN users uu ON uu.id = f.uploaded_by
+                LEFT JOIN users lu ON lu.id = f.last_updated_by
                 WHERE f.id = :id AND f.source_app = :app AND f.is_deleted = 0
                 LIMIT 1";
         $row = Database::run($sql, ['id' => $id, 'app' => $app])->fetch();
         return $row ?: null;
+    }
+
+    /** Update the file note (rich HTML). Sanitised + logged. */
+    public static function updateNote(string $app, int $id, string $html, int $userId): bool
+    {
+        $record = self::find($app, $id);
+        if ($record === null) {
+            return false;
+        }
+
+        $clean = self::sanitizeHtml($html);
+        $oldText = trim(preg_replace('/\s+/', ' ', strip_tags((string) $record['file_note'])));
+        $newText = trim(preg_replace('/\s+/', ' ', strip_tags($clean)));
+        if ($oldText === $newText && (string) $record['file_note'] === $clean) {
+            return true; // no change
+        }
+
+        $pdo = Database::connection();
+        $pdo->beginTransaction();
+        try {
+            Database::run(
+                'UPDATE files SET file_note = :n, last_updated_by = :u, last_updated_on = :now WHERE id = :id',
+                ['n' => $clean, 'u' => $userId, 'now' => date('Y-m-d H:i:s'), 'id' => $id]
+            );
+            Database::run(
+                'INSERT INTO file_update_log (file_id, updated_by, update_source, updated_at, fields_changed, import_batch_id)
+                 VALUES (:fid, :u, :src, :now, :fc, NULL)',
+                [
+                    'fid' => $id, 'u' => $userId, 'src' => 'MANUAL_EDIT', 'now' => date('Y-m-d H:i:s'),
+                    'fc'  => json_encode(['File Note' => [
+                        'old' => mb_substr($oldText, 0, 120),
+                        'new' => mb_substr($newText, 0, 120),
+                    ]], JSON_UNESCAPED_UNICODE),
+                ]
+            );
+            $pdo->commit();
+        } catch (\Throwable $e) {
+            $pdo->rollBack();
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Light HTML sanitiser for stored notes: removes script/style blocks,
+     * event-handler attributes, and javascript: URIs. (Single trusted admin
+     * audience; this is defence-in-depth, not a full HTML purifier.)
+     */
+    public static function sanitizeHtml(string $html): string
+    {
+        $html = preg_replace('#<\s*(script|style|iframe|object|embed)\b[^>]*>.*?<\s*/\s*\1\s*>#is', '', $html);
+        $html = preg_replace('#<\s*(script|style|iframe|object|embed)\b[^>]*/?>#is', '', $html);
+        $html = preg_replace('#\son\w+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)#i', '', $html);
+        $html = preg_replace('#(href|src)\s*=\s*(["\']?)\s*javascript:[^"\'>\s]*\2#i', '$1=$2#$2', $html);
+        return trim((string) $html);
     }
 
     /**
