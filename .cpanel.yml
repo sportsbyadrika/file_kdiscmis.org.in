@@ -28,7 +28,7 @@ deployment:
   tasks:
     - export DEPLOYPATH=/home/CHANGE_ME_CPANEL_USER/file_kdiscmis.org.in
     - /bin/mkdir -p "$DEPLOYPATH" "$DEPLOYPATH/config"
-    - /bin/mkdir -p "$DEPLOYPATH/storage/uploads" "$DEPLOYPATH/storage/reports" "$DEPLOYPATH/storage/tmp"
+    - /bin/mkdir -p "$DEPLOYPATH/storage/uploads" "$DEPLOYPATH/storage/reports" "$DEPLOYPATH/storage/tmp" "$DEPLOYPATH/storage/logs"
 
     # Replace application code only (these dirs hold no secrets or user data).
     - /bin/rm -rf "$DEPLOYPATH/src" "$DEPLOYPATH/public" "$DEPLOYPATH/views" "$DEPLOYPATH/vendor" "$DEPLOYPATH/bin"
