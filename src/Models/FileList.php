@@ -140,9 +140,13 @@ final class FileList
         // Keyword across ref, title, tags, remarks
         $kw = trim((string) ($filters['keyword'] ?? ''));
         if ($kw !== '') {
-            $where[] = '(f.reference_no LIKE :kw OR ' . $c['title_col'] . ' LIKE :kw OR '
-                     . $c['tags_col'] . ' LIKE :kw OR ' . $c['remarks_col'] . ' LIKE :kw)';
-            $params['kw'] = '%' . $kw . '%';
+            $where[] = '(f.reference_no LIKE :kw1 OR ' . $c['title_col'] . ' LIKE :kw2 OR '
+                     . $c['tags_col'] . ' LIKE :kw3 OR ' . $c['remarks_col'] . ' LIKE :kw4)';
+            $like = '%' . $kw . '%';
+            $params['kw1'] = $like;
+            $params['kw2'] = $like;
+            $params['kw3'] = $like;
+            $params['kw4'] = $like;
         }
 
         // Date range (document date vs upload date)

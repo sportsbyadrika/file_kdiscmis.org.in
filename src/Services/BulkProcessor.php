@@ -132,8 +132,11 @@ final class BulkProcessor
     {
         Database::run(
             'INSERT INTO files (source_app, reference_no, status, file_note, uploaded_by, upload_date, last_updated_by, last_updated_on, is_deleted, created_at)
-             VALUES (:app, :ref, :status, :note, :u, :now, :u, :now, 0, :now)',
-            ['app' => $app, 'ref' => $row['ref'], 'status' => $row['status'], 'note' => '', 'u' => $userId, 'now' => $now]
+             VALUES (:app, :ref, :status, :note, :uby, :udate, :luby, :luon, 0, :created)',
+            [
+                'app' => $app, 'ref' => $row['ref'], 'status' => $row['status'], 'note' => '',
+                'uby' => $userId, 'udate' => $now, 'luby' => $userId, 'luon' => $now, 'created' => $now,
+            ]
         );
         $fileId = (int) Database::connection()->lastInsertId();
 

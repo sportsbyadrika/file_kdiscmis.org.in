@@ -53,6 +53,10 @@ if (\App\Config::get('app.debug', false)) {
     ini_set('display_errors', '0');
 }
 
+// Always log; show detail only in debug. Registered early so startup
+// failures (e.g. a bad DB connection) are captured rather than blank-500'd.
+\App\ErrorHandler::register();
+
 // ---------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------
