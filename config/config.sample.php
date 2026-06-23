@@ -42,6 +42,23 @@ return [
     ],
 
     // ---------------------------------------------------------------
+    // Email / SMTP credentials (kept here so they are git-ignored and
+    // never overwritten by automated deploys — see .cpanel.yml).
+    // ---------------------------------------------------------------
+    'mail' => [
+        'transport'  => 'smtp',                 // 'smtp' | 'mail'
+        'from_email' => 'no-reply@kdiscmis.org.in',
+        'from_name'  => 'File Repository',
+        'smtp'       => [
+            'host'       => '',
+            'port'       => 587,
+            'username'   => '',
+            'password'   => '',
+            'encryption' => 'tls',              // 'tls' | 'ssl' | ''
+        ],
+    ],
+
+    // ---------------------------------------------------------------
     // Storage paths (absolute or relative to project root)
     // ---------------------------------------------------------------
     'storage' => [

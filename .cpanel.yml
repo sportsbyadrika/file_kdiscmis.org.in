@@ -1,0 +1,43 @@
+---
+# cPanel Git(TM) Version Control — deployment configuration.
+#
+# In cPanel > Git Version Control, "Update from Remote" then "Deploy HEAD
+# Commit" runs the tasks below from the repository checkout. They publish the
+# application to $DEPLOYPATH using only portable coreutils (no rsync needed).
+#
+# SECRETS AND DATA ARE NEVER UPDATED BY A DEPLOY:
+#   * config/config.php  (database + email/SMTP credentials + app key) is
+#     NEVER copied over or deleted. No task below references it destructively.
+#     It is created from config.sample.php ONLY on the very first deploy and is
+#     left untouched forever after — edit it once on the server.
+#   * storage/  (uploaded attachments, generated reports, tmp) is NEVER
+#     removed; only the directories are ensured to exist.
+#   * Only the application code directories (src, public, views, vendor, bin)
+#     are replaced on each deploy.
+#   * schema.sql is published but NEVER executed automatically (no automatic
+#     database migrations).
+#
+# ONE-TIME SETUP:
+#   1. Change CHANGE_ME_CPANEL_USER below to your cPanel username.
+#   2. After the first deploy, edit  $DEPLOYPATH/config/config.php  with your
+#      real DB + email credentials, then import schema.sql into your database.
+#   3. Point the domain's Document Root at  $DEPLOYPATH/public
+#      (cPanel > Domains > Manage > Document Root).
+
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/CHANGE_ME_CPANEL_USER/file_kdiscmis.org.in
+    - /bin/mkdir -p "$DEPLOYPATH" "$DEPLOYPATH/config"
+    - /bin/mkdir -p "$DEPLOYPATH/storage/uploads" "$DEPLOYPATH/storage/reports" "$DEPLOYPATH/storage/tmp"
+
+    # Replace application code only (these dirs hold no secrets or user data).
+    - /bin/rm -rf "$DEPLOYPATH/src" "$DEPLOYPATH/public" "$DEPLOYPATH/views" "$DEPLOYPATH/vendor" "$DEPLOYPATH/bin"
+    - /bin/cp -R src public views vendor bin "$DEPLOYPATH/"
+    - /bin/cp schema.sql README.md .htaccess "$DEPLOYPATH/"
+
+    # Publish the config TEMPLATE only — never the live config/config.php.
+    - /bin/cp config/config.sample.php "$DEPLOYPATH/config/config.sample.php"
+
+    # Create config.php from the template ONLY if it does not yet exist.
+    # An existing config (with real credentials) is never modified.
+    - /bin/test -f "$DEPLOYPATH/config/config.php" || /bin/cp "$DEPLOYPATH/config/config.sample.php" "$DEPLOYPATH/config/config.php"

@@ -1,0 +1,21 @@
+# Defense-in-depth.
+#
+# The intended Document Root is the /public directory, in which case this
+# file is never read. It only takes effect if the application is mistakenly
+# served from the project root — in that case it blocks direct web access to
+# application internals and to files that hold or reveal configuration
+# (config/config.php, schema.sql, .cpanel.yml, dotfiles, etc.).
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # Block application/internal directories.
+    RewriteRule ^(config|src|storage|vendor|bin)(/|$) - [F,L]
+</IfModule>
+
+# Block sensitive file types and dotfiles.
+<FilesMatch "(?i)(^\.|\.(sql|ya?ml|sample\.php|md|log)$)">
+    Require all denied
+</FilesMatch>
+
+# Never list directories.
+Options -Indexes

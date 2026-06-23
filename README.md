@@ -74,6 +74,36 @@ schema.sql  single-file database migration
    Point your web server / hosting `public_html` at the `/public` directory
    (or place the app in a sub-directory and set `app.base_url` accordingly).
 
+## Deployment (cPanel Git Version Control)
+
+The repository ships a `.cpanel.yml`. In cPanel **Git Version Control**, use
+*Update from Remote* → *Deploy HEAD Commit* to publish.
+
+One-time setup:
+
+1. Edit `.cpanel.yml` and set `CHANGE_ME_CPANEL_USER` to your cPanel username
+   (this sets `DEPLOYPATH`, the application directory in your home folder).
+2. After the first deploy, edit `DEPLOYPATH/config/config.php` with your real
+   database and email/SMTP credentials, then import `schema.sql`.
+3. Point the domain's **Document Root** at `DEPLOYPATH/public`.
+
+**Configuration is never overwritten by a deploy.** The deploy tasks only
+replace the application code directories (`src`, `public`, `views`, `vendor`,
+`bin`) and the `config.sample.php` template. They never copy over or delete:
+
+- `config/config.php` — database + email/SMTP credentials and the app key.
+  It is created from the sample **only on the first deploy**, then left
+  untouched. To change credentials, edit it once on the server.
+- `storage/uploads`, `storage/reports`, `storage/tmp` — user uploads and
+  generated reports survive every deploy.
+- `schema.sql` is published but **never executed automatically** — no
+  automatic database migrations.
+
+A defense-in-depth root `.htaccess` is also included: if the app is ever served
+from the project root instead of `/public`, it blocks web access to `config`,
+`src`, `storage`, `vendor`, `bin` and to sensitive files (`.sql`, `.yml`,
+`config.sample.php`, dotfiles).
+
 ## Database schema (v2.0)
 
 `users`, `files`, `eoffice_metadata`, `ospyndocs_metadata`,
@@ -121,4 +151,5 @@ All eight build stages are complete.
 - Passwords hashed with `password_hash()` (bcrypt)
 - Upload MIME + extension whitelist, sanitised stored filenames
 - Soft-deletes only (no hard deletes)
-- `config/config.php` git-ignored; secrets never committed
+- `config/config.php` (DB + email/SMTP credentials, app key) git-ignored;
+  secrets never committed and never overwritten by automated deploys
