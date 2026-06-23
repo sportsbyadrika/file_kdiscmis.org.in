@@ -26,7 +26,7 @@
 
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/CHANGE_ME_CPANEL_USER/file_kdiscmis.org.in
+    - export DEPLOYPATH=/home/shooting/public_html/file.kdiscmis.org.in
     - /bin/mkdir -p "$DEPLOYPATH" "$DEPLOYPATH/config"
     - /bin/mkdir -p "$DEPLOYPATH/storage/uploads" "$DEPLOYPATH/storage/reports" "$DEPLOYPATH/storage/tmp"
 
