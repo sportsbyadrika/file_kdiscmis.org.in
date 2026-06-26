@@ -49,6 +49,40 @@ final class FileRecord
         return $row ? (int) $row['id'] : null;
     }
 
+    /**
+     * Which of the given match keys already exist (non-deleted)? Batched in
+     * chunks so bulk validation needs a few queries, not one per row.
+     *
+     * @param string[] $refs
+     * @return array<string,bool> map of existing reference_no => true
+     */
+    public static function existingRefs(string $app, array $refs): array
+    {
+        $refs = array_values(array_unique(array_filter(array_map('strval', $refs), static fn ($r) => $r !== '')));
+        if ($refs === []) {
+            return [];
+        }
+        $found = [];
+        foreach (array_chunk($refs, 500) as $chunk) {
+            $ph = [];
+            $params = ['app' => $app];
+            foreach ($chunk as $i => $r) {
+                $key = 'r' . $i;
+                $ph[] = ':' . $key;
+                $params[$key] = $r;
+            }
+            $rows = Database::run(
+                'SELECT reference_no FROM files
+                 WHERE source_app = :app AND is_deleted = 0 AND reference_no IN (' . implode(',', $ph) . ')',
+                $params
+            )->fetchAll();
+            foreach ($rows as $row) {
+                $found[(string) $row['reference_no']] = true;
+            }
+        }
+        return $found;
+    }
+
     /** Find a non-deleted record (core + metadata + actor names) for the app. */
     public static function find(string $app, int $id): ?array
     {
