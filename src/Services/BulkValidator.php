@@ -53,6 +53,21 @@ final class BulkValidator
 
         $metaKeys = BulkTemplate::metaKeys($app);
         $reqInsert = BulkTemplate::requiredInsertKeys($app);
+        $refIdx = $keyIndex['ref'];
+
+        // Batch-resolve which match keys already exist (one query per 500 rows,
+        // not one per row), then track keys introduced by INSERTs earlier in
+        // THIS file so their UPDATE/HISTORY rows validate against the pending
+        // record too.
+        $allRefs = [];
+        foreach (array_slice($rows, 1) as $row) {
+            $r = trim((string) ($row[$refIdx] ?? ''));
+            if ($r !== '') {
+                $allRefs[] = $r;
+            }
+        }
+        $dbExisting = FileRecord::existingRefs($app, $allRefs);
+        $batchInserts = [];
 
         $results = [];
         $summary = self::zeroSummary();
@@ -73,16 +88,19 @@ final class BulkValidator
 
             $errors = [];
             $operation = strtoupper($get('operation'));
+            if ($operation === 'HISTORY') {
+                $operation = 'HISTORY_ONLY'; // accept "HISTORY" as an alias
+            }
             $ref = $get('ref');
 
             if (!in_array($operation, self::OPERATIONS, true)) {
-                $errors[] = ['column' => $keyToHeader['operation'], 'message' => 'Operation must be INSERT, UPDATE or HISTORY_ONLY.'];
+                $errors[] = ['column' => $keyToHeader['operation'], 'message' => 'Operation must be INSERT, UPDATE, HISTORY_ONLY or HISTORY.'];
             }
             if ($ref === '') {
                 $errors[] = ['column' => $keyToHeader['ref'], 'message' => 'Match key is required.'];
             }
 
-            $existingId = ($ref !== '') ? FileRecord::findIdByRef($app, $ref) : null;
+            $exists = ($ref !== '') && (isset($dbExisting[$ref]) || isset($batchInserts[$ref]));
 
             // Metadata values (normalised).
             $data = [];
@@ -107,7 +125,7 @@ final class BulkValidator
             $kind = 'insert';
             if ($operation === 'INSERT') {
                 $kind = 'insert';
-                if ($existingId !== null) {
+                if ($exists) {
                     $errors[] = ['column' => $keyToHeader['ref'], 'message' => 'A record with this match key already exists — use UPDATE.'];
                 }
                 foreach ($reqInsert as $rk) {
@@ -123,7 +141,7 @@ final class BulkValidator
                 }
             } elseif ($operation === 'UPDATE') {
                 $kind = 'update';
-                if ($existingId === null && $ref !== '') {
+                if (!$exists && $ref !== '') {
                     $errors[] = ['column' => $keyToHeader['ref'], 'message' => 'No existing record matches this key — cannot UPDATE.'];
                 }
                 if ($status === '') {
@@ -131,15 +149,20 @@ final class BulkValidator
                 }
             } elseif ($operation === 'HISTORY_ONLY') {
                 $kind = 'history_only';
-                if ($existingId === null && $ref !== '') {
+                if (!$exists && $ref !== '') {
                     $errors[] = ['column' => $keyToHeader['ref'], 'message' => 'No existing record matches this key — cannot add history.'];
                 }
                 if ($history === null) {
-                    $errors[] = ['column' => $keyToHeader['history_date'], 'message' => 'HISTORY_ONLY requires a History Date and Transaction Type.'];
+                    $errors[] = ['column' => $keyToHeader['history_date'], 'message' => 'HISTORY_ONLY / HISTORY requires a History Date and Transaction Type.'];
                 }
             }
 
             $level = !empty($errors) ? 'error' : 'ok';
+
+            // A valid INSERT introduces its match key for the rest of the file.
+            if ($operation === 'INSERT' && $level === 'ok' && $ref !== '') {
+                $batchInserts[$ref] = true;
+            }
 
             // A valid UPDATE that changes nothing and has no history -> warning.
             if ($level === 'ok' && $kind === 'update' && $history === null) {
@@ -160,7 +183,7 @@ final class BulkValidator
                 'status'     => $status,
                 'data'       => $data,
                 'history'    => $history,
-                'file_id'    => $existingId,
+                'file_id'    => null,
                 'level'      => $level,
                 'errors'     => $errors,
             ];

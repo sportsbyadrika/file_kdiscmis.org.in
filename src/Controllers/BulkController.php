@@ -21,6 +21,9 @@ use App\Services\Xlsx\XlsxWriter;
  */
 final class BulkController
 {
+    /** Max rows rendered into the validation preview / error panels. */
+    private const PREVIEW_CAP = 200;
+
     /** GET /bulk-upload?app= */
     public function index(): void
     {
@@ -98,33 +101,63 @@ final class BulkController
             return;
         }
 
+        @set_time_limit(180);
+        @ini_set('memory_limit', '512M');
+
+        // Persist the upload so the process step can re-read it without keeping
+        // (potentially huge) parsed data in the session. Re-validation at
+        // process time is deterministic and reflects the latest DB state.
+        $this->gcTempFiles();
+        $token = BulkProcessor::uuid();
+        $tmpDir = rtrim((string) Config::get('storage.tmp'), '/');
+        if (!is_dir($tmpDir)) {
+            @mkdir($tmpDir, 0775, true);
+        }
+        $storedPath = $tmpDir . '/bulk_' . $token . '.' . $ext;
+        if (!@move_uploaded_file((string) $file['tmp_name'], $storedPath) && !@copy((string) $file['tmp_name'], $storedPath)) {
+            $this->json(['ok' => false, 'error' => 'Could not stage the uploaded file (check storage/tmp permissions).'], 500);
+            return;
+        }
+
         try {
-            $rows = $ext === 'csv' ? $this->readCsv((string) $file['tmp_name']) : XlsxReader::rows((string) $file['tmp_name']);
+            $rows = $this->parseFile($storedPath, $ext);
+            $validation = BulkValidator::validate($app, $rows);
         } catch (\Throwable $e) {
+            @unlink($storedPath);
             $this->json(['ok' => false, 'error' => 'Could not read the file: ' . $e->getMessage()], 422);
             return;
         }
 
-        $validation = BulkValidator::validate($app, $rows);
         if ($validation['fatal'] !== null) {
+            @unlink($storedPath);
             $this->json(['ok' => false, 'error' => $validation['fatal']], 422);
             return;
         }
 
-        // Stash the validated rows for the process step.
-        $token = BulkProcessor::uuid();
-        Session::set('bulk_' . $token, ['app' => $app, 'rows' => $validation['rows']]);
+        Session::set('bulk_' . $token, ['app' => $app, 'path' => $storedPath, 'ext' => $ext]);
 
         $summary = $validation['summary'];
         $canProceed = ($summary['insert'] + $summary['update'] + $summary['history_only']) > 0;
+
+        // Cap rendered rows so a very large file does not produce megabytes of
+        // HTML; ALL valid rows are still processed at the next step.
+        $cap = self::PREVIEW_CAP;
+        $previewRows = array_slice($validation['rows'], 0, $cap);
+        $errorRows = array_slice(
+            array_values(array_filter($validation['rows'], static fn ($r) => $r['level'] === 'error')),
+            0,
+            $cap
+        );
 
         $this->json([
             'ok'          => true,
             'token'       => $token,
             'summary'     => $summary,
             'can_proceed' => $canProceed,
-            'preview'     => View::renderPartial('bulk/_preview', ['app' => $app, 'rows' => $validation['rows']]),
-            'errors'      => View::renderPartial('bulk/_errors', ['rows' => $validation['rows']]),
+            'preview'     => View::renderPartial('bulk/_preview', ['app' => $app, 'rows' => $previewRows]),
+            'errors'      => View::renderPartial('bulk/_errors', ['rows' => $errorRows]),
+            'truncated'   => $summary['total'] > $cap,
+            'cap'         => $cap,
         ]);
     }
 
@@ -133,22 +166,39 @@ final class BulkController
     {
         Auth::requireLogin();
         Csrf::check();
+        @set_time_limit(0);
+        @ini_set('memory_limit', '512M');
+
         $token = (string) ($_POST['token'] ?? '');
+        if (!preg_match('/^[0-9a-f\-]{36}$/', $token)) {
+            $this->json(['ok' => false, 'error' => 'Invalid import session.'], 422);
+            return;
+        }
         $stash = Session::get('bulk_' . $token);
-        if (!is_array($stash) || empty($stash['rows'])) {
+        if (!is_array($stash) || empty($stash['path']) || !is_file((string) $stash['path'])) {
             $this->json(['ok' => false, 'error' => 'This import session has expired. Please re-upload.'], 422);
             return;
         }
 
         $app = (string) $stash['app'];
-        $valid = array_values(array_filter($stash['rows'], static fn ($r) => ($r['level'] ?? 'error') !== 'error'));
+        try {
+            $rows = $this->parseFile((string) $stash['path'], (string) $stash['ext']);
+            $validation = BulkValidator::validate($app, $rows);
+        } catch (\Throwable $e) {
+            $this->json(['ok' => false, 'error' => 'Could not process the file: ' . $e->getMessage()], 422);
+            return;
+        }
+
+        $valid = array_values(array_filter($validation['rows'], static fn ($r) => $r['level'] !== 'error'));
         if (empty($valid)) {
             $this->json(['ok' => false, 'error' => 'There are no valid rows to import.'], 422);
             return;
         }
 
         $summary = BulkProcessor::process($app, $valid, (int) Auth::id());
+
         Session::remove('bulk_' . $token);
+        @unlink((string) $stash['path']);
 
         $summary['ok'] = true;
         $summary['app'] = $app;
@@ -181,6 +231,23 @@ final class BulkController
     }
 
     // ---------------------------------------------------------------
+
+    /** @return array<int,array<int,string>> */
+    private function parseFile(string $path, string $ext): array
+    {
+        return $ext === 'csv' ? $this->readCsv($path) : XlsxReader::rows($path);
+    }
+
+    /** Remove abandoned staged uploads older than a day. */
+    private function gcTempFiles(): void
+    {
+        $tmpDir = rtrim((string) Config::get('storage.tmp'), '/');
+        foreach (glob($tmpDir . '/bulk_*') ?: [] as $f) {
+            if (is_file($f) && (time() - (int) @filemtime($f)) > 86400) {
+                @unlink($f);
+            }
+        }
+    }
 
     /** @return array<int,array<int,string>> */
     private function readCsv(string $path): array

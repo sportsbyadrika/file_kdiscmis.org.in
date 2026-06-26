@@ -115,7 +115,11 @@
       (s.history_only ? '<span><strong>' + s.history_only + '</strong> history-only</span>' : '') +
       '<span class="text-danger"><strong>' + s.errors + '</strong> error(s)</span>' +
       (s.warnings ? '<span class="text-warning-emphasis"><strong>' + s.warnings + '</strong> warning(s)</span>' : '');
-    document.getElementById('previewTab').innerHTML = j.preview;
+    var note = j.truncated
+      ? '<div class="alert alert-info py-2 small mb-2">Showing the first ' + j.cap + ' rows. All ' +
+        s.total + ' rows will be processed when you continue.</div>'
+      : '';
+    document.getElementById('previewTab').innerHTML = note + j.preview;
     document.getElementById('errorsTab').innerHTML = j.errors;
     document.getElementById('errCount').textContent = s.errors;
     document.getElementById('toConfirmBtn').disabled = !j.can_proceed;
