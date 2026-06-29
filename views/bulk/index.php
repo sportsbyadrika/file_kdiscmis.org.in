@@ -6,7 +6,12 @@
  */
 ?>
 <div class="container py-4">
-  <h1 class="h4 mb-3"><i class="bi bi-cloud-arrow-up me-2"></i>Bulk Upload</h1>
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+    <h1 class="h4 mb-0"><i class="bi bi-cloud-arrow-up me-2"></i>Bulk Upload</h1>
+    <a href="<?= e(base_url('/attach-pdfs')) ?>" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-paperclip me-1"></i>Attach PDFs to records
+    </a>
+  </div>
 
   <!-- Step indicator -->
   <ol class="wizard-steps mb-4" id="wizardSteps">
