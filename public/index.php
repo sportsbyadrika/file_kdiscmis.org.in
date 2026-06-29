@@ -13,6 +13,7 @@ use App\Session;
 use App\Controllers\AuditController;
 use App\Controllers\AuthController;
 use App\Controllers\BulkController;
+use App\Controllers\PdfAttachController;
 use App\Controllers\DashboardController;
 use App\Controllers\FileListController;
 use App\Controllers\PdfController;
@@ -64,6 +65,10 @@ $router->get('/bulk-upload/template', [BulkController::class, 'template']);
 $router->post('/bulk-upload/validate', [BulkController::class, 'validate']);
 $router->post('/bulk-upload/process',  [BulkController::class, 'process']);
 $router->get('/bulk-upload/report',   [BulkController::class, 'report']);
+
+// Attach PDFs tool (no terminal required)
+$router->get('/attach-pdfs',      [PdfAttachController::class, 'index']);
+$router->post('/attach-pdfs/run', [PdfAttachController::class, 'run']);
 
 $router->get('/audit-log',   [AuditController::class, 'index']);
 
