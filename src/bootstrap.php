@@ -15,7 +15,9 @@ declare(strict_types=1);
  *   - Load global helper functions
  */
 
-define('ROOT_PATH', dirname(__DIR__));
+if (!defined('ROOT_PATH')) {
+    define('ROOT_PATH', dirname(__DIR__));
+}
 
 // ---------------------------------------------------------------------
 // Autoloader for App\ -> /src
