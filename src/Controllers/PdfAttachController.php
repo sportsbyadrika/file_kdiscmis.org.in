@@ -61,8 +61,8 @@ final class PdfAttachController
             $this->json(['ok' => false, 'error' => 'Invalid matching mode.'], 422);
             return;
         }
-        $deleteAfter = !empty($_POST['delete_after']);
-        $dryRun      = !empty($_POST['dry_run']);
+        $after  = in_array(($_POST['after'] ?? 'move'), ['keep', 'move', 'delete'], true) ? (string) $_POST['after'] : 'move';
+        $dryRun = !empty($_POST['dry_run']);
 
         $dir = PdfAttacher::stagingDir($app);
         if (!is_dir($dir)) {
@@ -88,7 +88,7 @@ final class PdfAttachController
         $this->gcJobs($tmpDir);
 
         $job = [
-            'app' => $app, 'mode' => $mode, 'delete_after' => $deleteAfter, 'dry_run' => $dryRun,
+            'app' => $app, 'mode' => $mode, 'after' => $after, 'dry_run' => $dryRun,
             'map' => $map, 'manifest' => $paths, 'created' => time(),
         ];
         if (@file_put_contents($tmpDir . '/attachjob_' . $token . '.json', json_encode($job)) === false) {
@@ -140,7 +140,8 @@ final class PdfAttachController
 
         $r = PdfAttacher::attachFiles(
             $job['app'], $chunk, $job['mode'], $job['map'] ?? [], $refIndex,
-            (int) Auth::id(), !empty($job['delete_after']), !empty($job['dry_run']), 60
+            (int) Auth::id(), (string) ($job['after'] ?? 'move'), PdfAttacher::stagingDir((string) $job['app']),
+            !empty($job['dry_run']), 60
         );
 
         $next = $offset + self::CHUNK;

@@ -38,6 +38,12 @@ final class PdfAttacher
         return self::importBase() . '/' . $app . '_pdfs';
     }
 
+    /** Where successfully-attached originals are moved to (sibling of staging). */
+    public static function doneDir(string $app): string
+    {
+        return self::stagingDir($app) . '_done';
+    }
+
     /** Recursively list *.pdf paths under $dir, sorted deterministically. */
     public static function listPdfs(string $dir): array
     {
@@ -119,7 +125,8 @@ final class PdfAttacher
         array $map,
         ?array $refIndex,
         int $userId,
-        bool $deleteAfter = false,
+        string $after = 'keep',           // 'keep' | 'move' | 'delete'
+        ?string $stagingRoot = null,      // required when $after === 'move'
         bool $dryRun = false,
         int $resultCap = 100
     ): array {
@@ -181,9 +188,7 @@ final class PdfAttacher
                 @chmod($destDir . '/' . $stored, 0640);
                 Attachment::create($fileId, $name, $fileId . '/' . $stored, 'application/pdf', (int) filesize($path), $userId);
                 $s['attached']++;
-                if ($deleteAfter) {
-                    @unlink($path);
-                }
+                self::afterAttach($after, $path, $stagingRoot);
             } catch (\Throwable $e) {
                 $s['failed']++;
                 self::push($s, $resultCap, $name, 'failed', $e->getMessage());
@@ -201,7 +206,7 @@ final class PdfAttacher
     {
         $paths = self::listPdfs($pdfDir);
         $refIndex = self::buildRefIndex($app);
-        $r = self::attachFiles($app, $paths, empty($map) ? 'filename' : 'map', $map, $refIndex, $userId, false, $dryRun, $resultCap);
+        $r = self::attachFiles($app, $paths, empty($map) ? 'filename' : 'map', $map, $refIndex, $userId, 'keep', null, $dryRun, $resultCap);
         $r['found'] = count($paths);
         return $r;
     }
@@ -234,6 +239,30 @@ final class PdfAttacher
         }
         fclose($fh);
         return $map;
+    }
+
+    /** Post-attach disposition of the source PDF. */
+    private static function afterAttach(string $after, string $path, ?string $stagingRoot): void
+    {
+        if ($after === 'delete') {
+            @unlink($path);
+            return;
+        }
+        if ($after === 'move' && $stagingRoot !== null && $stagingRoot !== '') {
+            $stagingRoot = rtrim($stagingRoot, '/');
+            $rel = str_starts_with($path, $stagingRoot . '/') ? substr($path, strlen($stagingRoot) + 1) : basename($path);
+            $dest = $stagingRoot . '_done/' . $rel;
+            $dir = dirname($dest);
+            if (!is_dir($dir)) {
+                @mkdir($dir, 0775, true);
+            }
+            if (!@rename($path, $dest)) {
+                // Fall back to copy+unlink across filesystems.
+                if (@copy($path, $dest)) {
+                    @unlink($path);
+                }
+            }
+        }
     }
 
     private static function push(array &$s, int $cap, string $name, string $status, string $detail): void
