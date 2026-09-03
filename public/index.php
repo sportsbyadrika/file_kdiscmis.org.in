@@ -66,9 +66,10 @@ $router->post('/bulk-upload/validate', [BulkController::class, 'validate']);
 $router->post('/bulk-upload/process',  [BulkController::class, 'process']);
 $router->get('/bulk-upload/report',   [BulkController::class, 'report']);
 
-// Attach PDFs tool (no terminal required)
-$router->get('/attach-pdfs',      [PdfAttachController::class, 'index']);
-$router->post('/attach-pdfs/run', [PdfAttachController::class, 'run']);
+// Attach PDFs tool (no terminal required) — scan builds a job, run processes chunks
+$router->get('/attach-pdfs',       [PdfAttachController::class, 'index']);
+$router->post('/attach-pdfs/scan', [PdfAttachController::class, 'scan']);
+$router->post('/attach-pdfs/run',  [PdfAttachController::class, 'run']);
 
 $router->get('/audit-log',   [AuditController::class, 'index']);
 
