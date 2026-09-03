@@ -1,6 +1,6 @@
 <?php
 /**
- * Attach PDFs tool. Expects: $dir, $pdfCount.
+ * Attach PDFs tool. Expects: $dir, $pdfCount, $chunk.
  */
 use App\Csrf;
 ?>
@@ -19,14 +19,12 @@ use App\Csrf;
     <div class="card-body">
       <h2 class="h6">How it works</h2>
       <ol class="small mb-0">
-        <li>In cPanel <strong>File Manager</strong>, upload your PDFs (named <code>&lt;computer-number&gt;.pdf</code>)
-            into this folder — zipping them and using <em>Extract</em> is fastest:
+        <li>Upload your PDF files by <strong>FTP</strong> into this folder (sub-folders are fine — they're scanned too):
             <div class="mt-1"><code><?= e($dir) ?></code></div>
         </li>
-        <li>Below, choose the app, upload the <code>computer_to_ref.csv</code> mapping, and click
-            <strong>Preview</strong> first, then <strong>Attach</strong>.</li>
-        <li>Re-running is safe — already-attached PDFs are skipped. You can delete the
-            <code>import_pdfs</code> folder afterwards.</li>
+        <li>Pick the app and matching mode below, click <strong>Scan</strong>, then <strong>Start</strong>.
+            Import runs in batches with a progress bar, so large sets (10k+) won't time out.</li>
+        <li>Re-running is safe (already-attached PDFs are skipped). A record can hold many PDFs.</li>
       </ol>
     </div>
   </div>
@@ -35,40 +33,73 @@ use App\Csrf;
     <div class="card-body">
       <div class="alert alert-light border d-flex align-items-center gap-2">
         <i class="bi bi-folder2-open"></i>
-        <span>PDFs currently staged in <code>import_pdfs</code>:
-          <strong id="pdfCount"><?= (int) $pdfCount ?></strong></span>
-        <span class="text-muted small ms-2">(upload them via File Manager, then refresh this page)</span>
+        <span>PDFs currently staged: <strong id="pdfCount"><?= (int) $pdfCount ?></strong></span>
+        <a href="<?= e(base_url('/attach-pdfs')) ?>" class="btn btn-sm btn-link ms-2">Refresh</a>
       </div>
 
       <form id="attachForm" enctype="multipart/form-data">
         <?= Csrf::field() ?>
-        <div class="row g-3 align-items-end">
-          <div class="col-12 col-md-3">
+        <div class="row g-3">
+          <div class="col-6 col-md-3">
             <label class="form-label small">App</label>
-            <select class="form-select" name="app">
-              <option value="eoffice">eOffice</option>
+            <select class="form-select" name="app" id="appSel">
               <option value="ospyndocs">OspynDocs</option>
+              <option value="eoffice">eOffice</option>
             </select>
           </div>
-          <div class="col-12 col-md-6">
-            <label class="form-label small">Mapping CSV (computer_to_ref.csv)</label>
-            <input type="file" class="form-control" name="map" accept=".csv">
-            <div class="form-text">Optional — if omitted, each PDF's computer number is used directly as the File Reference No.</div>
+          <div class="col-12 col-md-5">
+            <label class="form-label small">Match files to records by</label>
+            <select class="form-select" name="mode" id="modeSel">
+              <option value="filename">Reference in filename (before first "_")</option>
+              <option value="exact">Whole filename = reference</option>
+              <option value="map">Computer-number mapping CSV (eOffice)</option>
+            </select>
+            <div class="form-text" id="modeHelp">
+              e.g. <code>1-2020-KDISC_FairCopy_7.pdf</code> &rarr; reference <code>1/2020/KDISC</code>
+              (separators are matched flexibly). Multiple PDFs per file are supported.
+            </div>
           </div>
-          <div class="col-12 col-md-3 d-flex gap-2">
-            <button type="button" class="btn btn-outline-secondary flex-grow-1" id="btnPreview">
-              <span class="spinner-border spinner-border-sm me-1 d-none" data-spin></span>Preview
+          <div class="col-12 col-md-4" id="mapWrap" style="display:none;">
+            <label class="form-label small">Mapping CSV</label>
+            <input type="file" class="form-control" name="map" accept=".csv">
+          </div>
+
+          <div class="col-12 d-flex flex-wrap gap-3 align-items-center">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="dryRun" name="dry_run" value="1" checked>
+              <label class="form-check-label" for="dryRun">Preview only (don't attach yet)</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="delAfter" name="delete_after" value="1">
+              <label class="form-check-label" for="delAfter">Delete each PDF from the staging folder after attaching (saves disk space)</label>
+            </div>
+          </div>
+
+          <div class="col-12 d-flex gap-2">
+            <button type="button" class="btn btn-primary" id="btnStart">
+              <span class="spinner-border spinner-border-sm me-1 d-none" id="startSpin"></span>
+              <i class="bi bi-play-fill me-1"></i>Scan &amp; Start
             </button>
-            <button type="button" class="btn btn-primary flex-grow-1" id="btnAttach">
-              <span class="spinner-border spinner-border-sm me-1 d-none" data-spin></span>Attach
-            </button>
+            <button type="button" class="btn btn-outline-danger d-none" id="btnStop">Stop</button>
           </div>
         </div>
       </form>
 
-      <div id="attachResult" class="mt-3 d-none">
-        <div class="alert" id="attachSummary"></div>
-        <div id="attachIssues"></div>
+      <!-- Progress -->
+      <div id="progressWrap" class="mt-3 d-none">
+        <div class="d-flex justify-content-between small mb-1">
+          <span id="progressLabel">Starting…</span>
+          <span id="progressPct">0%</span>
+        </div>
+        <div class="progress" role="progressbar" style="height:20px;">
+          <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressBar" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Totals -->
+      <div id="totalsWrap" class="mt-3 d-none">
+        <div class="alert" id="totalsBanner"></div>
+        <div id="issuesBox"></div>
       </div>
     </div>
   </div>
@@ -76,7 +107,8 @@ use App\Csrf;
 
 <script>
   window.AttachConfig = {
-    runUrl: <?= json_encode(base_url('/attach-pdfs/run')) ?>,
+    scanUrl: <?= json_encode(base_url('/attach-pdfs/scan')) ?>,
+    runUrl:  <?= json_encode(base_url('/attach-pdfs/run')) ?>,
     csrfToken: <?= json_encode(\App\Csrf::token()) ?>
   };
 </script>
