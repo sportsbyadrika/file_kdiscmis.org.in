@@ -25,16 +25,20 @@ final class PdfAttachController
     public function index(): void
     {
         Auth::requireLogin();
-        $dir = PdfAttacher::defaultDir();
-        if (!is_dir($dir)) {
-            @mkdir($dir, 0775, true);
+
+        $dirs = [];
+        foreach (['ospyndocs', 'eoffice'] as $a) {
+            $d = PdfAttacher::stagingDir($a);
+            if (!is_dir($d)) {
+                @mkdir($d, 0775, true);
+            }
+            $dirs[$a] = ['path' => $d, 'count' => count(PdfAttacher::listPdfs($d))];
         }
 
         View::render('tools/attach_pdfs', [
             'pageTitle' => 'Attach PDFs',
             'active'    => 'bulk-upload',
-            'dir'       => $dir,
-            'pdfCount'  => count(PdfAttacher::listPdfs($dir)),
+            'dirs'      => $dirs,
             'chunk'     => self::CHUNK,
         ]);
     }
@@ -60,10 +64,13 @@ final class PdfAttachController
         $deleteAfter = !empty($_POST['delete_after']);
         $dryRun      = !empty($_POST['dry_run']);
 
-        $dir = PdfAttacher::defaultDir();
+        $dir = PdfAttacher::stagingDir($app);
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0775, true);
+        }
         $paths = PdfAttacher::listPdfs($dir);
         if (empty($paths)) {
-            $this->json(['ok' => false, 'error' => 'No PDF files found in storage/import_pdfs. Upload them via FTP first.'], 422);
+            $this->json(['ok' => false, 'error' => 'No PDF files found in ' . basename(dirname($dir)) . '/' . basename($dir) . '. Upload them via FTP first.'], 422);
             return;
         }
 
@@ -122,8 +129,8 @@ final class PdfAttachController
         $total = count($manifest);
         $chunk = array_slice($manifest, $offset, self::CHUNK);
 
-        // Guard: only process paths inside the staging directory.
-        $dirReal = realpath(PdfAttacher::defaultDir()) ?: '';
+        // Guard: only process paths inside this app's staging directory.
+        $dirReal = realpath(PdfAttacher::stagingDir((string) $job['app'])) ?: '';
         $chunk = array_values(array_filter($chunk, static function ($p) use ($dirReal) {
             $rp = realpath($p);
             return $rp !== false && $dirReal !== '' && str_starts_with($rp, $dirReal . DIRECTORY_SEPARATOR);

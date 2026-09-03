@@ -1,8 +1,10 @@
 <?php
 /**
- * Attach PDFs tool. Expects: $dir, $pdfCount, $chunk.
+ * Attach PDFs tool. Expects: $dirs (per-app path+count), $chunk.
  */
 use App\Csrf;
+
+$default = 'ospyndocs';
 ?>
 <div class="container py-4">
   <nav aria-label="breadcrumb">
@@ -19,8 +21,9 @@ use App\Csrf;
     <div class="card-body">
       <h2 class="h6">How it works</h2>
       <ol class="small mb-0">
-        <li>Upload your PDF files by <strong>FTP</strong> into this folder (sub-folders are fine — they're scanned too):
-            <div class="mt-1"><code><?= e($dir) ?></code></div>
+        <li>Upload your PDF files by <strong>FTP</strong> into the folder for the chosen app
+            (sub-folders inside it are fine — they're scanned too):
+            <div class="mt-1"><code id="stagePath"><?= e($dirs[$default]['path']) ?></code></div>
         </li>
         <li>Pick the app and matching mode below, click <strong>Scan</strong>, then <strong>Start</strong>.
             Import runs in batches with a progress bar, so large sets (10k+) won't time out.</li>
@@ -33,7 +36,7 @@ use App\Csrf;
     <div class="card-body">
       <div class="alert alert-light border d-flex align-items-center gap-2">
         <i class="bi bi-folder2-open"></i>
-        <span>PDFs currently staged: <strong id="pdfCount"><?= (int) $pdfCount ?></strong></span>
+        <span>PDFs currently staged: <strong id="pdfCount"><?= (int) $dirs[$default]['count'] ?></strong></span>
         <a href="<?= e(base_url('/attach-pdfs')) ?>" class="btn btn-sm btn-link ms-2">Refresh</a>
       </div>
 
@@ -109,7 +112,8 @@ use App\Csrf;
   window.AttachConfig = {
     scanUrl: <?= json_encode(base_url('/attach-pdfs/scan')) ?>,
     runUrl:  <?= json_encode(base_url('/attach-pdfs/run')) ?>,
-    csrfToken: <?= json_encode(\App\Csrf::token()) ?>
+    csrfToken: <?= json_encode(\App\Csrf::token()) ?>,
+    dirs: <?= json_encode($dirs) ?>
   };
 </script>
 <script src="<?= e(base_url('/assets/js/attach.js')) ?>"></script>

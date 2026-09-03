@@ -26,10 +26,16 @@ final class PdfAttacher
 {
     public const MODES = ['filename', 'exact', 'map'];
 
-    /** Default staging folder (FTP target): storage/import_pdfs. */
-    public static function defaultDir(): string
+    /** Base staging folder: storage/import_pdfs (under the project root). */
+    public static function importBase(): string
     {
-        return dirname(rtrim((string) Config::get('storage.uploads'), '/')) . '/import_pdfs';
+        return ROOT_PATH . '/storage/import_pdfs';
+    }
+
+    /** Per-app staging folder (FTP target), e.g. storage/import_pdfs/ospyndocs_pdfs. */
+    public static function stagingDir(string $app): string
+    {
+        return self::importBase() . '/' . $app . '_pdfs';
     }
 
     /** Recursively list *.pdf paths under $dir, sorted deterministically. */

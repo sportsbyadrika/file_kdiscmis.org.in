@@ -22,9 +22,9 @@ foreach (array_slice($argv, 1) as $a) {
         $args[$m[1]] = $m[2] ?? true;
     }
 }
-$dir    = isset($args['dir']) ? (string) $args['dir'] : PdfAttacher::defaultDir();
 $mapCsv = isset($args['map']) ? (string) $args['map'] : '';
 $app    = isset($args['app']) ? (string) $args['app'] : 'eoffice';
+$dir    = isset($args['dir']) ? (string) $args['dir'] : PdfAttacher::stagingDir($app);
 $dryRun = isset($args['dry-run']);
 
 if (!is_dir($dir)) {

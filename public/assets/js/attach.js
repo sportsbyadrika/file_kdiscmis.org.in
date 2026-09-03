@@ -10,9 +10,20 @@
     var form = document.getElementById('attachForm');
     var modeSel = document.getElementById('modeSel');
     var mapWrap = document.getElementById('mapWrap');
+    var appSel = document.getElementById('appSel');
 
     modeSel.addEventListener('change', function () {
       mapWrap.style.display = modeSel.value === 'map' ? '' : 'none';
+    });
+
+    // Keep the displayed staging folder + count in sync with the chosen app.
+    appSel.addEventListener('change', function () {
+      var info = (cfg.dirs || {})[appSel.value];
+      if (!info) return;
+      var pathEl = document.getElementById('stagePath');
+      var cntEl = document.getElementById('pdfCount');
+      if (pathEl) pathEl.textContent = info.path;
+      if (cntEl) cntEl.textContent = info.count;
     });
 
     document.getElementById('btnStart').addEventListener('click', start);
