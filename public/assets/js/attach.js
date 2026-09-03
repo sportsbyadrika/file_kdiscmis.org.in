@@ -21,8 +21,10 @@
       var info = (cfg.dirs || {})[appSel.value];
       if (!info) return;
       var pathEl = document.getElementById('stagePath');
+      var doneEl = document.getElementById('donePath');
       var cntEl = document.getElementById('pdfCount');
       if (pathEl) pathEl.textContent = info.path;
+      if (doneEl) doneEl.textContent = info.path + '_done';
       if (cntEl) cntEl.textContent = info.count;
     });
 

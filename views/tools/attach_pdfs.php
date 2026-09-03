@@ -28,6 +28,10 @@ $default = 'ospyndocs';
         <li>Pick the app and matching mode below, click <strong>Scan</strong>, then <strong>Start</strong>.
             Import runs in batches with a progress bar, so large sets (10k+) won't time out.</li>
         <li>Re-running is safe (already-attached PDFs are skipped). A record can hold many PDFs.</li>
+        <li><strong>After a successful attach</strong> the original is moved to the <em>done</em> folder, so
+            whatever is left in the staging folder above is the <strong>unmapped</strong> set:
+            <div class="mt-1"><code id="donePath"><?= e($dirs[$default]['path'] . '_done') ?></code></div>
+        </li>
       </ol>
     </div>
   </div>
@@ -67,14 +71,18 @@ $default = 'ospyndocs';
             <input type="file" class="form-control" name="map" accept=".csv">
           </div>
 
-          <div class="col-12 d-flex flex-wrap gap-3 align-items-center">
+          <div class="col-12 col-md-5">
+            <label class="form-label small">After attaching each PDF</label>
+            <select class="form-select" name="after" id="afterSel">
+              <option value="move" selected>Move it to the &ldquo;_done&rdquo; folder (leftovers = unmapped)</option>
+              <option value="keep">Keep it in the staging folder</option>
+              <option value="delete">Delete it (saves disk space, no backup)</option>
+            </select>
+          </div>
+          <div class="col-12">
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="dryRun" name="dry_run" value="1" checked>
-              <label class="form-check-label" for="dryRun">Preview only (don't attach yet)</label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="delAfter" name="delete_after" value="1">
-              <label class="form-check-label" for="delAfter">Delete each PDF from the staging folder after attaching (saves disk space)</label>
+              <label class="form-check-label" for="dryRun">Preview only — don't attach or move anything yet</label>
             </div>
           </div>
 
